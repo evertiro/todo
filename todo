@@ -1,0 +1,268 @@
+#!/bin/bash
+#
+#   Todo: A simple cli todo application
+#
+#   Copyright (C) 2009, Daniel J Griffiths <ghost1227@archlinux.us>
+#   Thanks to:
+#   tigrmesh - initial sounding board
+#   Arkham & yitz_ - scripting help
+#
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
+
+NAME="todo"
+VER="0.2"
+LPATH="$HOME/.todo/"
+
+if [ ! -d $LPATH ]; then
+	mkdir "$LPATH"
+fi
+
+###################################
+### General functions           ###
+###################################
+
+usage(){
+	echo "Todo v$VER: a simple cli todo application"
+	echo
+	echo "USAGE: todo [option] <parameter>"
+	echo
+	echo "OPTIONS:"
+	echo "   todo -a  [item]		: add [item] to default list"
+	echo "   todo -al [list] [item]	: add [item] to list [list]"
+	echo "   todo -d  [num]		: delete item [num] from default list"
+	echo "   todo -dl [list] [num]	: delete item [num] from [list]"
+	echo "   todo -e  [num]  [item]	: change item [num] to [item] in default list"
+	echo "   todo -el [list] [num] [item]	: change item [num] to [item] in list [list]"
+	echo "   todo -p  [list]		: print list [list], print all if none specified"
+	echo "   todo -rl [list]		: remove list [list]"
+}
+
+version(){
+	echo "Todo v$VER: a simple cli todo application"
+	echo "Homepage: http://ghost1227.com"
+	echo "	Copyright (C) 2009 Daniel J Griffiths <ghost1227@archlinux.us>"
+	echo "	This program may be freely redistributed under"
+	echo "	the terms of the GNU General Public License"
+}
+
+###################################
+### ADD FUNCTION                ###
+###################################
+
+add(){
+	if [ $LIST ]; then
+		echo $ITEM >> $LPATH/$LIST.list	
+	else
+		echo $ITEM >> $LPATH/todo.list
+	fi
+	exit 0
+}
+
+###################################
+### DELETE FUNCTION             ###
+###################################
+
+del(){
+	if [ $LIST ]; then
+		sed -i "$NUM d" $LPATH/$LIST.list
+	else
+		sed -i "$NUM d" $LPATH/todo.list
+	fi
+	exit 0	
+}
+
+###################################
+### EDIT FUNCTION               ###
+###################################
+
+edit(){
+	if [ $LIST ]; then
+		sed -i "${NUM}s/.*/${ITEM}/" $LPATH/$LIST.list
+	else
+		sed -i "${NUM}s/.*/${ITEM}/" $LPATH/todo.list
+	fi
+	exit 0
+}
+
+###################################
+### REMOVE LIST FUNCTION        ###
+###################################
+
+rmlist(){
+	if [ -f $LPATH/$LIST.list ]; then
+		rm $LPATH/$LIST.list
+		echo "List [$LIST] deleted!"
+	else
+		echo "List [$LIST] not found!"
+	fi
+	exit 0
+}
+
+###################################
+### PRINT FUNCTION              ###
+###################################
+
+out(){
+	if [ ! $LIST ]; then
+		for i in $LPATH/*.list; do
+			if [ -f "$i" ]; then
+				LNAME=`basename $i | cut -d'.' -f1`
+				echo "[$LNAME]"
+				nl $i
+			else
+				echo "No valid todo lists found!"
+				exit 0
+			fi
+		done
+	else
+		if [ -f $LPATH/$LIST.list ]; then
+			echo "[$LIST]"
+			nl $LPATH/$LIST.list
+			exit 0
+		else
+			echo "Todo list [$LIST] not found!"
+		fi
+	fi
+}
+
+###################################
+### GET RUNTIME ARGUMENTS       ###
+###################################
+
+ARGLIST=$@
+while [ "$#" -ne "0" ]; do
+	case $1 in
+		--help| -h)
+		usage
+		exit 0
+		;;
+		--version| -v)
+		version
+		exit 0
+		;;
+		--add| -a)
+		shift
+		if [[ ! -z $@ ]]; then
+			ITEM="$@"
+		else
+			exit 0
+		fi
+		add
+		exit 0
+		;;
+		--addlist| -al)
+		if [[ ! -z $2 ]]; then
+			LIST="$2"
+			shift +2
+			if [[ ! -z $@ ]]; then
+				ITEM="$@"
+			else
+				exit 0
+			fi
+		else
+			exit 0
+		fi
+		add
+		exit 0
+		;;
+		--del| -d)
+		shift
+		if [[ ! -z $@ ]]; then
+			NUM="$@"
+		else
+			exit 0
+		fi
+		del
+		exit 0
+		;;
+		--dellist| -dl)
+		if [[ ! -z $2 ]]; then
+			LIST="$2"
+			shift +2
+			if [[ ! -z $@ ]]; then
+				NUM="$@"
+			else
+				exit 0
+			fi
+		else
+			exit 0
+		fi
+		del
+		exit 0
+		;;
+		--edit| -e)
+		shift
+		if [[ ! -z $1 ]]; then
+			NUM="$1"
+			shift
+			if [[ ! -z $@ ]]; then
+				ITEM="$@"
+			else
+				exit 0
+			fi
+		else
+			exit 0
+		fi
+		edit
+		exit 0
+		;;
+		--editlist| -el)
+		shift
+		if [[ ! -z $1 ]]; then
+			LIST="$1"
+			shift
+			if [[ ! -z $1 ]]; then
+				NUM="$1"
+				shift
+				if [[ ! -z $@ ]]; then
+					ITEM="$@"
+				else
+					exit 0
+				fi
+			else
+				exit 0
+			fi
+		else
+			exit 0
+		fi
+		edit
+		exit 0
+		;;
+		--rmlist| -rl)
+		shift
+		if [[ ! -z $@ ]]; then
+			LIST="$@"
+		fi
+		rmlist
+		exit 0
+		;;
+		--print| -p)
+		shift
+		if [[ ! -z $@ ]]; then
+			LIST="$@"
+		fi
+		out
+		exit 0
+		;;
+		*)
+		args[${#args[@]}]=$1
+		;;
+	esac
+	shift
+done
+
+usage
+exit 0
