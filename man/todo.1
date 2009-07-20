@@ -1,0 +1,41 @@
+.TH "TODO" "1" "July 2009" "" ""
+.SH "NAME"
+todo \- a simple cli todo application
+
+.SH "SYNOPSIS"
+todo [option] <parameters>
+.SH "DESCRIPTION"
+Todo is a simple bash todo application that I threw together primarily for the purposes of seeing how far I could push pure bash. The basic idea came from a request by Mr. Green on my Desktop Workshop thread on the Arch forums regarding piping a todo list through conky. While this script is probably more than most people will ever need, it is works for my purposes.
+.SH "OPTIONS"
+.TP 
+\fB\-a\fR, \fB\-\-add\fR [item]
+Add [item] to default list
+.TP 
+\fB\-al\fR, \fB\-\-addlist\fR [list] [item]
+Add [item] to list [list]
+.TP 
+\fB\-d\fR, \fB\-\-del\fR [num]
+Delete item [num] from default list
+.TP 
+\fB\-dl\fR, \fB\-\-dellist\fR [list] [num]
+Delete item [num] from list [list]
+.TP 
+\fB\-e\fR, \fB\-\-edit\fR [num] [item]
+Change item [num] to [item] in default list
+.TP 
+\fB\-el\fR, \fB\-\-editlist\fR [list] [num] [item]
+Change item [num] to [item] in list [list]
+.TP 
+\fB\-p\fR, \fB\-\-print\fR [list]
+Print list [list], print all if none specified
+.TP 
+\fB\-rl\fR, \fB\-\-rmlist\fR [list]
+Remove list [list]
+.TP 
+\fB\-h\fR, \fB\-\-help\fR
+Display help
+.TP 
+\fB\-v\fR, \fB\-\-version\fR
+Output version information and exit
+.SH "AUTHORS"
+Ghost1227
